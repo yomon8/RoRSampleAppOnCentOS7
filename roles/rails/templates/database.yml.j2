@@ -1,0 +1,16 @@
+default: &default
+  adapter: mysql2
+  encoding: utf8
+  pool: 5
+  username: "{{ dbuser }}"
+  password: "{{ dbpassword }}"
+  socket: /var/lib/mysql/mysql.sock
+development:
+  <<: *default
+  database: railbook_development
+test:
+  <<: *default
+  database: railbook_test
+production:
+  <<: *default
+  database: railbook_production

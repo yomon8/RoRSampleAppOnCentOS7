@@ -1,0 +1,51 @@
+---
+- name: Create rails sample app
+  become: true
+  become_user: "{{ rails.user }}"
+  shell: '~/.rbenv/shims/rails new "{{ rails.appname }}" -d mysql'
+  args:
+    chdir: ~/
+    creates: "~/{{ rails.appname }}/Rakefile"
+
+- name: Be sure db connection of rails configured
+  become: true
+  become_user: "{{ rails.user }}"
+  template:
+    src: database.yml.j2
+    dest: "~/{{ rails.appname }}/config/database.yml"
+    
+- name: Generate scaffold book
+  become: true
+  become_user: "{{ rails.user }}"
+  shell: '~/.rbenv/shims/rails generate scaffold book isbn:string title:string price:integer publish:string published:date cd:boolean'
+  args:
+    chdir: "~/{{ rails.appname }}"
+
+- name: Create Database
+  become: true
+  become_user: "{{ rails.user }}"
+  shell: '~/.rbenv/shims/rake db:create'
+  args:
+    chdir: "~/{{ rails.appname }}"
+
+- name: Migrate Database
+  become: true
+  become_user: "{{ rails.user }}"
+  shell: '~/.rbenv/shims/rake db:migrate'
+  args:
+    chdir: "~/{{ rails.appname }}"
+
+- name: Prepare test data file
+  become: true
+  become_user: "{{ rails.user }}"
+  copy:
+    src: books.yml
+    dest: "~/{{ rails.appname }}/test/fixtures/books.yml"
+
+- name: Load test data
+  become: true
+  become_user: "{{ rails.user }}"
+  shell: '~/.rbenv/shims/rake db:fixtures:load FIXTURES=books'
+  args:
+    chdir: "~/{{ rails.appname }}"
+
